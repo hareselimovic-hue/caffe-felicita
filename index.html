@@ -215,7 +215,7 @@
   .stack img.loaded { opacity: 1; }
 
   /* warm tone + vignette so every photo sits in the espresso palette */
-  .g::before, .stack figure::after {
+  .st-img::after, .stack figure::after {
     content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; transition: opacity .7s var(--ease);
     background:
       radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(26, 15, 10, .6) 100%),
@@ -256,31 +256,38 @@
   .card .steam path:nth-child(3) { animation-delay: .8s }
   @keyframes steam { 0% { stroke-dashoffset: 20; opacity: 0 } 40% { opacity: 1 } 100% { stroke-dashoffset: -20; opacity: 0 } }
 
-  /* ---------- Gallery ---------- */
-  .gallery { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: clamp(140px, 17vw, 230px); gap: 14px; margin-top: 56px; }
-  .g {
-    position: relative; overflow: hidden; border-radius: 18px; cursor: zoom-in;
+  /* ---------- Gallery: one photo per scroll step, edges melting into the background ---------- */
+  .story { display: flex; flex-direction: column; gap: clamp(70px, 11vw, 150px); margin-top: 70px; }
+  .st { display: grid; grid-template-columns: 1.45fr 1fr; align-items: center; gap: clamp(24px, 5vw, 70px); }
+  .st:nth-child(even) { grid-template-columns: 1fr 1.45fr; }
+  .st:nth-child(even) .st-img { order: 2; }
+  .st-img {
+    position: relative; aspect-ratio: 16/11; overflow: hidden; border-radius: 26px; cursor: zoom-in;
+    -webkit-mask-image: linear-gradient(90deg, #000 58%, transparent 100%); mask-image: linear-gradient(90deg, #000 58%, transparent 100%);
+    clip-path: inset(0 100% 0 0); transition: clip-path 1.7s var(--ease);
   }
-  .g img {
-    width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); filter: var(--grade); opacity: 0;
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 1.3s var(--ease) var(--d, 0s), transform 1.6s var(--ease), filter .7s var(--ease), opacity 1s var(--ease);
+  .st:nth-child(even) .st-img {
+    -webkit-mask-image: linear-gradient(270deg, #000 58%, transparent 100%); mask-image: linear-gradient(270deg, #000 58%, transparent 100%);
+    clip-path: inset(0 0 0 100%);
   }
-  .g img.loaded { opacity: 1; }
-  .g.in img { transform: scale(1.02); clip-path: inset(0); }
-  .g:hover img { transform: scale(1.1); filter: sepia(.05) saturate(1.05) contrast(1.04); }
-  .g:hover::before { opacity: .4; }
-  .g::after {
-    content: attr(data-cap); position: absolute; z-index: 2; left: 16px; bottom: 14px; font-size: .8rem; letter-spacing: .1em;
-    text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: .5s var(--ease);
-    text-shadow: 0 2px 12px rgba(0, 0, 0, .8);
+  .st.in .st-img { clip-path: inset(0 0 0 0) !important; }
+  .st-par { position: absolute; inset: -12% 0; }
+  .st-img img {
+    width: 100%; height: 100%; object-fit: cover; filter: var(--grade); opacity: 0; transform: scale(1.25);
+    transition: transform 2.2s var(--ease), filter .7s var(--ease), opacity 1s var(--ease);
   }
-  .g:hover::after { opacity: 1; transform: none; }
-  @media (hover: none) { .g::after { opacity: 1; transform: none; } }
-  .g1 { grid-column: span 3; grid-row: span 2; } .g2 { grid-column: span 3; }
-  .g3 { grid-column: span 2; } .g4 { grid-column: span 1; }
-  .g5 { grid-column: span 2; grid-row: span 2; } .g6 { grid-column: span 2; }
-  .g7 { grid-column: span 2; } .g8 { grid-column: span 2; } .g9 { grid-column: span 2; }
+  .st-img img.loaded { opacity: 1; }
+  .st.in .st-img img { transform: scale(1.02); }
+  .st-img:hover img { transform: scale(1.08); filter: sepia(.05) saturate(1.05) contrast(1.04); }
+  .st-img:hover::after { opacity: .4; }
+  .st-text > * { opacity: 0; transform: translateY(34px); transition: opacity 1s var(--ease), transform 1.2s var(--ease); }
+  .st.in .st-text > * { opacity: 1; transform: none; }
+  .st.in .st-text > :nth-child(1) { transition-delay: .45s; }
+  .st.in .st-text > :nth-child(2) { transition-delay: .6s; }
+  .st.in .st-text > :nth-child(3) { transition-delay: .75s; }
+  .st-num { font-family: var(--serif); font-style: italic; font-size: clamp(3.5rem, 8vw, 6rem); line-height: 1; color: transparent; -webkit-text-stroke: 1px rgba(230, 176, 114, .55); }
+  .st-text h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.8rem, 3.4vw, 2.7rem); line-height: 1.1; letter-spacing: -.02em; margin: 10px 0 12px; }
+  .st-text p { color: var(--muted); font-weight: 300; max-width: 360px; }
 
   .lightbox {
     position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px;
@@ -328,9 +335,15 @@
   .map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: sepia(.35) saturate(.85) contrast(1.05); transition: filter .6s; }
   .map:hover iframe { filter: none; }
   .map .pin {
-    position: absolute; left: 18px; bottom: 18px; z-index: 2; padding: 12px 18px; border-radius: 14px;
-    background: rgba(26, 15, 10, .85); backdrop-filter: blur(8px); font-size: .88rem; border: 1px solid var(--line);
+    position: absolute; left: 18px; bottom: 18px; right: 18px; max-width: 340px; z-index: 2; padding: 14px 18px; border-radius: 16px;
+    display: flex; gap: 14px; align-items: center;
+    background: rgba(26, 15, 10, .88); backdrop-filter: blur(8px); border: 1px solid var(--line);
+    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, .8);
   }
+  .map .pin .pi { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--honey); color: var(--espresso); }
+  .map .pin .pi svg { width: 20px; height: 20px; }
+  .map .pin strong { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.1rem; }
+  .map .pin span { color: var(--muted); font-size: .85rem; }
 
   footer { padding: 60px clamp(16px, 5vw, 64px) 40px; border-top: 1px solid var(--line); }
   .foot { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: end; gap: 30px; flex-wrap: wrap; }
@@ -341,9 +354,12 @@
   @media (max-width: 960px) {
     .about, .visit { grid-template-columns: 1fr; }
     .menu-grid { grid-template-columns: repeat(2, 1fr); }
-    .gallery { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
-    .g1, .g2, .g3, .g4, .g5, .g6, .g7, .g8, .g9 { grid-column: span 1; grid-row: span 1; }
-    .g1, .g5 { grid-column: span 2; grid-row: span 2; }
+    .st, .st:nth-child(even) { grid-template-columns: 1fr; gap: 22px; }
+    .st:nth-child(even) .st-img { order: 0; }
+    .st .st-img, .st:nth-child(even) .st-img {
+      -webkit-mask-image: linear-gradient(180deg, #000 65%, transparent 100%); mask-image: linear-gradient(180deg, #000 65%, transparent 100%);
+      clip-path: inset(0 0 100% 0);
+    }
   }
   @media (max-width: 720px) {
     .nav-links {
@@ -423,7 +439,7 @@
         </g>
       </svg>
       <figure><img data-parallax="0.08" loading="lazy" decoding="async" sizes="(max-width: 960px) 80vw, 40vw" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1100&q=75&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&q=75&auto=format&fit=crop 600w, https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1100&q=75&auto=format&fit=crop 1100w" alt="Enterijer kafića"></figure>
-      <figure><img data-parallax="-0.06" loading="lazy" decoding="async" sizes="(max-width: 960px) 60vw, 30vw" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=75&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=450&q=75&auto=format&fit=crop 450w, https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&q=75&auto=format&fit=crop 800w" alt="Cappuccino s latte artom"></figure>
+      <figure><img data-parallax="-0.06" loading="lazy" decoding="async" sizes="(max-width: 960px) 60vw, 30vw" src="https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=800&q=75&auto=format&fit=crop" srcset="https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=450&q=75&auto=format&fit=crop 450w, https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=800&q=75&auto=format&fit=crop 800w" alt="Enterijer kafića sa zelenilom"></figure>
     </div>
     <div>
       <span class="label reveal">O nama</span>
@@ -431,7 +447,7 @@
       <p class="lead reveal" style="--d:.15s">U Kranjčevićevoj ulici, nekoliko koraka od užurbanog centra, Caffe Felicita je mjesto gdje se jutarnji espresso pretvara u razgovor, a razgovor u najljepši dio dana. Topla atmosfera, osmijeh za šankom i kafa pripremljena s pažnjom.</p>
       <div class="facts">
         <div class="fact reveal" style="--d:.25s"><strong>Centar</strong><small>Sarajeva</small></div>
-        <div class="fact reveal" style="--d:.35s"><strong>Kafa</strong><small>od jutra do noći</small></div>
+        <div class="fact reveal" style="--d:.35s"><strong>Kafa</strong><small>od 07:00 radnim danima</small></div>
         <div class="fact reveal" style="--d:.45s"><strong>Ćejf</strong><small>uvijek uključen</small></div>
       </div>
     </div>
@@ -457,7 +473,7 @@
   <div class="wrap">
     <span class="label reveal">Galerija</span>
     <h2 data-split>Atmosfera koju <em>osjetiš.</em></h2>
-    <div class="gallery" id="gallery"></div>
+    <div class="story" id="gallery"></div>
   </div>
 </section>
 
@@ -465,7 +481,7 @@
 <section>
   <div class="wrap">
     <div class="reviews reveal" id="reviews">
-      <img class="rv-bg" alt="" aria-hidden="true" loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1400&q=60&auto=format&fit=crop">
+      <img class="rv-bg" alt="" aria-hidden="true" loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=1400&q=60&auto=format&fit=crop">
       <div class="stars" id="stars"></div>
       <h2 data-split>Šta kažu <em>naši gosti?</em></h2>
       <p class="lead">Bio si kod nas? Podijeli utisak na Googleu, a ako tek dolaziš, pročitaj šta drugi kažu.</p>
@@ -503,7 +519,10 @@
       </div>
       <div class="map reveal" style="--d:.15s">
         <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Caffe Felicita na Google mapi"></iframe>
-        <div class="pin">☕ Caffe Felicita</div>
+        <div class="pin">
+          <div class="pi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><strong>Caffe Felicita</strong><span id="pinAddr"></span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -524,17 +543,19 @@
 <script>
 /* =========================================================
    PODACI O KAFIĆU – sve izmjene radi ovdje
-   Radno vrijeme provjeri na Google Mapsu prije objave!
+   Radno vrijeme je s OpenStreetMapa – potvrdi s vlasnikom.
    ========================================================= */
 const CAFE = {
   name: "Caffe Felicita",
   address: "Kranjčevićeva 3, 71000 Sarajevo",
   phone: "+387 61 153 753",
   mapsQuery: "Caffe Felicita, Kranjčevićeva 3, Sarajevo",
+  // Google ne pronalazi kafić po imenu, pa mapa i navigacija koriste tačne koordinate
+  coords: "43.8579274,18.4087327",
   // [dan, otvaranje, zatvaranje] – 0 = nedjelja
   hours: [
-    [1, "07:00", "23:00"], [2, "07:00", "23:00"], [3, "07:00", "23:00"],
-    [4, "07:00", "23:00"], [5, "07:00", "00:00"], [6, "08:00", "00:00"], [0, "08:00", "23:00"]
+    [1, "07:00", "16:00"], [2, "07:00", "16:00"], [3, "07:00", "16:00"],
+    [4, "07:00", "16:00"], [5, "07:00", "16:00"], [6, "12:00", "16:00"], [0, "12:00", "16:00"]
   ],
   taglines: ["Mala sreća u svakoj šoljici.", "Tvoje mjesto u srcu Sarajeva.", "Kafa, razgovor i ćejf."],
   menu: [
@@ -543,13 +564,12 @@ const CAFE = {
     ["Bosanska kafa", "Tradicija u džezvi, uz rahat lokum i dobro društvo.", "dzezva"],
     ["Osvježenja", "Limunade, sokovi i ledene kafe za tople dane.", "glass"]
   ],
-  // Zamijeni stock slike pravim fotografijama kafića (s Google profila ili Instagrama)
+  // Privremene slike enterijera – zamijeni pravim fotografijama Felicite kad stignu
   gallery: [
-    ["1501339847302-ac426a4a7cbb", "Atmosfera"], ["1495474472287-4d71bcdd2085", "Uz društvo"],
-    ["1442512595331-e89e73853f31", "Pour over"], ["1514432324607-a09d9b4aefdd", "Crna kafa"],
-    ["1521017432531-fbd92d768814", "Enterijer"], ["1559925393-8be0ec4767c8", "Terasa"],
-    ["1511920170033-f8396924c348", "Espresso"], ["1445116572660-236099ec97a0", "Uz prozor"],
-    ["1497935586351-b67a49e012bf", "Zrno do šoljice"]
+    ["1501339847302-ac426a4a7cbb", "Uđi, sjedi, uživaj.", "Mjesto gdje vrijeme teče malo sporije, a kafa uvijek stigne na vrijeme."],
+    ["1481833761820-0509d3217039", "Pauza koju zaslužuješ.", "Nekoliko minuta samo za tebe, daleko od gužve, a opet u srcu grada."],
+    ["1445116572660-236099ec97a0", "Kutak uz prozor.", "Za jutarnje vijesti, prvu kafu i pogled na ulicu koja se budi."],
+    ["1525610553991-2bede1a236e2", "Društvo je pola ćejfa.", "Dođi sam, ostani s prijateljima. Za stolom uvijek ima mjesta."]
   ]
 };
 
@@ -563,10 +583,11 @@ $("#callBtn").href = tel;
 $("#phoneLink").href = tel;
 $("#phoneLink").textContent = CAFE.phone;
 $("#addrLink").textContent = CAFE.address;
-$("#addrLink").href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+$("#addrLink").href = `https://www.google.com/maps/search/?api=1&query=${CAFE.coords}`;
 $("#reviewsBtn").href = `https://www.google.com/maps/search/?api=1&query=${q}`;
-$("#dirBtn").href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
-$("#map").src = `https://maps.google.com/maps?q=${q}&z=17&ie=UTF8&iwloc=&output=embed`;
+$("#dirBtn").href = `https://www.google.com/maps/dir/?api=1&destination=${CAFE.coords}`;
+$("#map").src = `https://maps.google.com/maps?q=${CAFE.coords}&z=17&hl=bs&output=embed`;
+$("#pinAddr").textContent = CAFE.address;
 $("#footAddr").textContent = CAFE.address + " · " + CAFE.phone;
 $("#year").textContent = new Date().getFullYear();
 
@@ -635,17 +656,22 @@ document.querySelectorAll(".card").forEach(card => {
 
 /* ---------- Gallery + lightbox ---------- */
 const img = (id, w) => `https://images.unsplash.com/photo-${id}?w=${w}&q=75&auto=format&fit=crop`;
-$("#gallery").innerHTML = CAFE.gallery.map(([id, cap], i) =>
-  `<div class="g g${i + 1}" data-cap="${cap}" data-full="${img(id, 1800)}" style="--d:${(i % 3) * 0.12}s"><img loading="lazy" decoding="async" src="${img(id, 900)}" srcset="${img(id, 500)} 500w, ${img(id, 900)} 900w, ${img(id, 1400)} 1400w" sizes="(max-width: 960px) ${i === 0 || i === 4 ? "100vw" : "50vw"}, ${i < 2 ? "50vw" : "34vw"}" alt="${cap}"></div>`).join("");
+$("#gallery").innerHTML = CAFE.gallery.map(([id, title, text], i) => `
+  <article class="st">
+    <div class="st-img" data-full="${img(id, 1800)}" data-cap="${title}">
+      <div class="st-par" data-parallax="0.1"><img loading="lazy" decoding="async" src="${img(id, 1100)}" srcset="${img(id, 600)} 600w, ${img(id, 1100)} 1100w, ${img(id, 1600)} 1600w" sizes="(max-width: 960px) 100vw, 60vw" alt="${title}"></div>
+    </div>
+    <div class="st-text"><div class="st-num">0${i + 1}</div><h3>${title}</h3><p>${text}</p></div>
+  </article>`).join("");
 const lb = $("#lightbox");
-document.querySelectorAll(".g").forEach(g => g.addEventListener("click", () => {
+document.querySelectorAll(".st-img").forEach(g => g.addEventListener("click", () => {
   lb.querySelector("img").src = g.dataset.full; lb.querySelector("img").alt = g.dataset.cap; lb.classList.add("open");
 }));
 lb.addEventListener("click", () => lb.classList.remove("open"));
 addEventListener("keydown", e => e.key === "Escape" && lb.classList.remove("open"));
 
 /* ---------- Fade images in once loaded ---------- */
-document.querySelectorAll(".hero-photo img, .stack img, .g img, .rv-bg").forEach(im => {
+document.querySelectorAll(".hero-photo img, .stack img, .st-img img, .rv-bg").forEach(im => {
   const done = () => im.classList.add("loaded");
   im.complete && im.naturalWidth ? done() : im.addEventListener("load", done, { once: true });
 });
@@ -676,7 +702,12 @@ document.querySelectorAll("[data-split]").forEach(el => {
 const io = new IntersectionObserver(entries => entries.forEach(e => {
   if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
 }), { threshold: .18, rootMargin: "0px 0px -6% 0px" });
-document.querySelectorAll(".reveal, [data-split], .g, #stack").forEach(el => io.observe(el));
+document.querySelectorAll(".reveal, [data-split], #stack").forEach(el => io.observe(el));
+// gallery rows open one at a time, only once a row is well inside the screen
+const ioStory = new IntersectionObserver(entries => entries.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add("in"); ioStory.unobserve(e.target); }
+}), { threshold: .45, rootMargin: "0px 0px -12% 0px" });
+document.querySelectorAll(".st").forEach(el => ioStory.observe(el));
 
 /* ---------- Nav ---------- */
 const nav = $("#nav");
